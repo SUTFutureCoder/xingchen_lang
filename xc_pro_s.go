@@ -2,19 +2,10 @@
  * xingchen语pro版本编译器
  *
  * UTF8全支持
- * 仅支持解释运行
+ * 支持解释运行和编译运行
  *
- * eg: go run xc_pro.go 加加加加头右加加加加加加加加加加左减尾右加加加加加加加加加出出减出 => 110
-
-    分解质因数
-    百度外卖  go run xc_pro.go 加加加加加加加加加加头右加加加加加加加加加加头右加加加加加加加加加加加加加加加加头右加加加加加加加加加加加加加加加加加加加左减尾左减尾左减尾右右右减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减出\
-右\
-加加加加加加加加加加头右加加加加加加加加加加头右加加头右加加加加加加加加加加加头右加加加加加加加加加加加左减尾左减尾左减尾左减尾右右右右加加加加加加加加加加加加加加加加加加加加加加加加加加加加加加出\
-右\
-加加加加加加加加加加头右加加加加加加加加加加头右加加头右加加头右加加加头右加加加加加加加加加加加加加加加加加加加左减尾左减尾左减尾左减尾左减尾右右右右右加加加加加加出\
-右\
-加加加头右加加加加加头右加加加加加加加头右加加加加加加加头右加加加加加加加加加加加加加加加加加加加加加加加加加加加加加左减尾左减尾左减尾左减尾右右右右加加加加加加加加加加加加加加加加加加加出
- * 中文输出参考 http://bianma.911cha.com/
+ * eg: go run xc_pro.go run 加加加加头右加加加加加加加加加加左减尾右加加加加加加加加加出出减出 => 110
+ * 中文输出参考 http://www.unicode.org/cgi-bin/GetUnihanData.pl?codepoint=52A0
  *
  */
 package main
@@ -25,22 +16,33 @@ import (
 	"io/ioutil"
 )
 
+var mode = ""   //标记是run还是build
+
 //连续字节内存块
 type block struct {
 	mem []rune
 	pos int
 }
 
-func BlockNewPro() *block {
+func BlockNewProS() *block {
 	block := new(block)
 	block.mem = make([]rune, 10240)
 	return block
 }
 
-func BuildPro(commandRune []rune, loopmap map[int]int){
+func PackBinaryProS(output []rune){
+	//STEP1 复制一份自己 暂时用xc_pro_template
+	//STEP2 注入输入
+
+
+	//STEP  删除拷贝
+}
+
+func BuildProS(commandRune []rune, loopmap map[int]int){
 	current := 0
-	block := BlockNewPro()
+	block := BlockNewProS()
 	var input string
+	var output []rune
 	for current < len(commandRune) {
 		command := string(commandRune[current])
 		switch command {
@@ -64,19 +66,25 @@ func BuildPro(commandRune []rune, loopmap map[int]int){
 				current = loopmap[current]  //移动到头部
 			}
 		case "出":
-			//fmt.Println(block.pos)
-			//fmt.Print(block.mem[block.pos])
-			fmt.Printf("%c", block.mem[block.pos])
+			output = append(output, block.mem[block.pos])
 		case "入":
 			fmt.Scanf("%s", &input)
 			block.mem[block.pos] = ([]rune(input))[0]
 		}
 		current++
 	}
+
+	if mode == "run" {
+		for _, outputChar := range output {
+			fmt.Printf("%c", outputChar)
+		}
+	} else if mode == "build"{
+		PackBinary(output)
+	}
 }
 
 
-func ParsePro(command []rune) ([]rune, map[int]int){
+func ParseProS(command []rune) ([]rune, map[int]int){
 	//已解析
 	parsed := make([]rune, 0)
 	//循环栈，也就是头部集
@@ -105,24 +113,30 @@ func ParsePro(command []rune) ([]rune, map[int]int){
 }
 
 func main() {
-	if len(os.Args) < 2 {
+	if len(os.Args) < 3 {
 		fmt.Println("请传入指令或.xc文件")
 		os.Exit(1)
 	}
 
+	if os.Args[1] != "run" && os.Args[1] != "build" {
+		fmt.Println("第二个参数需要是run（运行）或build（编译）")
+		os.Exit(1)
+	}
+	mode = os.Args[1]
+
 	command := ""
 	//允许直接传入指令或文件，如文件不存在则直接读取
-	_, err := os.Stat(os.Args[1])
+	_, err := os.Stat(os.Args[2])
 	if err == nil || os.IsExist(err){
-		fileCommand, err := ioutil.ReadFile(os.Args[1])
+		fileCommand, err := ioutil.ReadFile(os.Args[2])
 		if err != nil {
 			fmt.Println("读取文件失败")
 			os.Exit(1)
 		}
 		command = string(fileCommand)
 	} else {
-		command = os.Args[1]
+		command = os.Args[2]
 	}
 	commandRune := []rune(command)
-	BuildPro(ParsePro(commandRune))
+	BuildProS(ParseProS(commandRune))
 }

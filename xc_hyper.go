@@ -1,19 +1,11 @@
 /*
- * xingchen语pro版本编译器
+ * xingchen语hyper版本编译器
  *
  * UTF8全支持
+ * 支持命令关键字多字符
  * 仅支持解释运行
  *
- * eg: go run xc_pro.go 加加加加头右加加加加加加加加加加左减尾右加加加加加加加加加出出减出 => 110
-
-    分解质因数
-    百度外卖  go run xc_pro.go 加加加加加加加加加加头右加加加加加加加加加加头右加加加加加加加加加加加加加加加加头右加加加加加加加加加加加加加加加加加加加左减尾左减尾左减尾右右右减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减减出\
-右\
-加加加加加加加加加加头右加加加加加加加加加加头右加加头右加加加加加加加加加加加头右加加加加加加加加加加加左减尾左减尾左减尾左减尾右右右右加加加加加加加加加加加加加加加加加加加加加加加加加加加加加加出\
-右\
-加加加加加加加加加加头右加加加加加加加加加加头右加加头右加加头右加加加头右加加加加加加加加加加加加加加加加加加加左减尾左减尾左减尾左减尾左减尾右右右右右加加加加加加出\
-右\
-加加加头右加加加加加头右加加加加加加加头右加加加加加加加头右加加加加加加加加加加加加加加加加加加加加加加加加加加加加加左减尾左减尾左减尾左减尾右右右右加加加加加加加加加加加加加加加加加加加出
+ * eg: go run xc_pro.go run 加加加加头右加加加加加加加加加加左减尾右加加加加加加加加加出出减出 => 110
  * 中文输出参考 http://bianma.911cha.com/
  *
  */
@@ -28,18 +20,19 @@ import (
 //连续字节内存块
 type block struct {
 	mem []rune
+	commandLength []int
 	pos int
 }
 
-func BlockNewPro() *block {
+func BlockNewHyper() *block {
 	block := new(block)
 	block.mem = make([]rune, 10240)
 	return block
 }
 
-func BuildPro(commandRune []rune, loopmap map[int]int){
+func BuildHyper(commandRune []rune, loopmap map[int]int){
 	current := 0
-	block := BlockNewPro()
+	block := BlockNewHyper()
 	var input string
 	for current < len(commandRune) {
 		command := string(commandRune[current])
@@ -64,8 +57,6 @@ func BuildPro(commandRune []rune, loopmap map[int]int){
 				current = loopmap[current]  //移动到头部
 			}
 		case "出":
-			//fmt.Println(block.pos)
-			//fmt.Print(block.mem[block.pos])
 			fmt.Printf("%c", block.mem[block.pos])
 		case "入":
 			fmt.Scanf("%s", &input)
@@ -76,7 +67,7 @@ func BuildPro(commandRune []rune, loopmap map[int]int){
 }
 
 
-func ParsePro(command []rune) ([]rune, map[int]int){
+func ParseHyper(command []rune) ([]rune, map[int]int){
 	//已解析
 	parsed := make([]rune, 0)
 	//循环栈，也就是头部集
@@ -124,5 +115,5 @@ func main() {
 		command = os.Args[1]
 	}
 	commandRune := []rune(command)
-	BuildPro(ParsePro(commandRune))
+	BuildHyper(ParseHyper(commandRune))
 }
