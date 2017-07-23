@@ -5,7 +5,47 @@
  * 支持命令关键字多字符
  * 仅支持解释运行
  *
- * eg: go run xc_pro.go run 加加加加头右加加加加加加加加加加左减尾右加加加加加加加加加出出减出 => 110
+ * eg: go run xc_hyper_mo.go
+鲜花蛋糕\
+鲜花蛋糕\
+鲜花蛋糕\
+鲜花蛋糕\
+商超药品\
+早餐\
+鲜花蛋糕\
+鲜花蛋糕\
+鲜花蛋糕\
+鲜花蛋糕\
+鲜花蛋糕\
+鲜花蛋糕\
+鲜花蛋糕\
+鲜花蛋糕\
+鲜花蛋糕\
+鲜花蛋糕\
+下午茶\
+生态链\
+质享指南\
+早餐\
+鲜花蛋糕\
+鲜花蛋糕\
+鲜花蛋糕\
+鲜花蛋糕\
+鲜花蛋糕\
+鲜花蛋糕\
+鲜花蛋糕\
+鲜花蛋糕\
+鲜花蛋糕\
+我编不下去了\
+我编不下去了\
+生态链\
+我编不下去了
+
+
+或
+
+go run xc_hyper_xin.go 鲜花蛋糕鲜花蛋糕鲜花蛋糕鲜花蛋糕商超药品早餐鲜花蛋糕鲜花蛋糕鲜花蛋糕鲜花蛋糕鲜花蛋糕鲜花蛋糕鲜花蛋糕鲜花蛋糕鲜花蛋糕鲜花蛋糕下午茶生态链质享指南早餐鲜花蛋糕鲜花蛋糕鲜花蛋糕鲜花蛋糕鲜花蛋糕鲜花蛋糕鲜花蛋糕鲜花蛋糕鲜花蛋糕我编不下去了我编不下去了生态链我编不下去了
+
+110
  * 中文输出参考 http://bianma.911cha.com/
  *
  */
@@ -15,6 +55,7 @@ import (
 	"fmt"
 	"os"
 	"io/ioutil"
+	"strings"
 )
 
 //连续字节内存块
@@ -22,6 +63,19 @@ type block struct {
 	mem []rune
 	commandLength []int
 	pos int
+}
+
+func GetCommandMap() map[string]string{
+	return map[string]string{
+		"鲜花蛋糕": "加",
+		"生态链": "减",
+		"下午茶" : "左",
+		"早餐" : "右",
+		"商超药品" : "头",
+		"质享指南" : "尾",
+		"我编不下去了": "出",
+		"新品": "入",
+	}
 }
 
 func BlockNewHyper() *block {
@@ -113,6 +167,11 @@ func main() {
 		command = string(fileCommand)
 	} else {
 		command = os.Args[1]
+	}
+
+	commandMap := GetCommandMap()
+	for commandMapOld, commandMapNew := range commandMap {
+		command = strings.Replace(command, commandMapOld, commandMapNew, -1)
 	}
 	commandRune := []rune(command)
 	BuildHyper(ParseHyper(commandRune))
